@@ -1,0 +1,6 @@
+outs:
+- md5: b313519825b43022af36096fe54f1923.dir
+  size: 187157417
+  nfiles: 126
+  hash: md5
+  path: archivos_base
