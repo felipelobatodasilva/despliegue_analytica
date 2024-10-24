@@ -1,4 +1,5 @@
 [core]
     remote = mi_remoto
+    autostage = true
 ['remote "mi_remoto"']
     url = s3://despliegue-analytica-uniandes
