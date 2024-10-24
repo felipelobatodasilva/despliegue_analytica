@@ -1,6 +1,6 @@
 outs:
-- md5: 07c7c08ddb8d316fcbd3afd5621bcc6f.dir
-  size: 257508271
-  nfiles: 204
+- md5: e0ae26a06fa5309c92f7e7428a474618.dir
+  size: 40997884
+  nfiles: 62
   hash: md5
   path: files_parquet
