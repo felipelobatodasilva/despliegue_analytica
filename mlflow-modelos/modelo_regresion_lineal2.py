@@ -39,7 +39,7 @@ model = Pipeline(steps=[
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # Configurar o experimento no MLflow
-experiment_id = mlflow.set_experiment("modelo_regresion_lineal2").experiment_id
+experiment_id = mlflow.set_experiment("modelo_regresion_lineal1").experiment_id
 
 # Iniciar a execução no MLflow
 with mlflow.start_run(experiment_id=experiment_id) as run:
@@ -59,7 +59,7 @@ with mlflow.start_run(experiment_id=experiment_id) as run:
     mlflow.log_metric("R2", r2)
     
     # Registrar o modelo no MLflow
-    mlflow.sklearn.log_model(model, "modelo_regresion_lineal2")
+    mlflow.sklearn.log_model(model, "modelo_regresion_lineal1")
 
     # Exibir as métricas
     print(f"RMSE: {rmse}, MAE: {mae}, R2: {r2}")
