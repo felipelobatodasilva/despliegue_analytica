@@ -64,6 +64,8 @@ with mlflow.start_run(experiment_id=experiment_id) as run:
     mlflow.log_metric("RMSE", rmse)
     mlflow.log_metric("MAE", mae)
     mlflow.log_metric("R2", r2)
+    mlflow.log_metric("Cross-validated RMSE", cross_val_rmse)
+
     mlflow.sklearn.log_model(model, "modelo_regresion_lineal1")
 
     # Mostrar las métricas
