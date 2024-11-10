@@ -10,8 +10,6 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.feature_selection import SelectKBest, f_regression
 
-mlflow.set_experiment("modelo3_regresion_lineal")
-
 df = pd.read_parquet('../files_parquet/df_baseFinal.parquet', engine='pyarrow')
 features = ['temporada', 'nombre_categoria_producto', 'peso_producto_g', 
             'largo_producto_cm', 'altura_producto_cm', 'ancho_producto_cm', 
@@ -37,21 +35,23 @@ model = Pipeline(steps=[
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-with mlflow.start_run() as run:
+experiment_id = mlflow.set_experiment("modelo_regresion_lineal1").experiment_id
+
+with mlflow.start_run(experiment_id=experiment_id) as run:
+    # Treinamento e logging...
+    # Defina seu código para treinar o modelo e registrar as métricas aqui
+    
+    # Exemplo:
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
-
+    
     mse = mean_squared_error(y_test, y_pred)
     rmse = np.sqrt(mse)
     mae = mean_absolute_error(y_test, y_pred)
     r2 = r2_score(y_test, y_pred)
-    cross_val_rmse = np.sqrt(-cross_val_score(model, X, y, cv=5, scoring='neg_mean_squared_error').mean())
-
+    
     mlflow.log_metric("RMSE", rmse)
     mlflow.log_metric("MAE", mae)
     mlflow.log_metric("R2", r2)
-    mlflow.log_metric("Cross-validated RMSE", cross_val_rmse)
+    mlflow.sklearn.log_model(model, "modelo_regresion_lineal1")
 
-    mlflow.sklearn.log_model(model, "LinearRegressionModel_SelectKBest")
-
-    print(f"RMSE: {rmse}, MAE: {mae}, R2: {r2}, Cross-validated RMSE: {cross_val_rmse}")
