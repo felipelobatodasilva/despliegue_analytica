@@ -9,7 +9,7 @@ from sklearn.model_selection import cross_val_score, train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-# Carregar os dados
+# Cargar los datos
 df = pd.read_parquet('../files_parquet/df_baseFinal.parquet', engine='pyarrow')
 features = ['temporada', 'nombre_categoria_producto', 'peso_producto_g', 
             'largo_producto_cm', 'altura_producto_cm', 'ancho_producto_cm', 
@@ -18,32 +18,32 @@ target = 'precio'
 X = df[features]
 y = df[target]
 
-# Definir colunas numéricas e categóricas
+# Definir columnas numéricas y categóricas
 numerical_features = ['peso_producto_g', 'largo_producto_cm', 'altura_producto_cm', 'ancho_producto_cm']
 categorical_features = ['temporada', 'nombre_categoria_producto', 'ciudad_cliente', 'estado_cliente', "id_producto"]
 
-# Pré-processamento (normalização e codificação one-hot)
+# Preprocesamiento (normalización y codificación one-hot)
 preprocessor = ColumnTransformer(
     transformers=[
         ('num', StandardScaler(), numerical_features),
         ('cat', OneHotEncoder(handle_unknown='ignore'), categorical_features)
     ])
 
-# Configurar o pipeline com o pré-processador e a regressão linear
+# Configurar el pipeline con el preprocesador y la regresión lineal
 model = Pipeline(steps=[
     ('preprocessor', preprocessor),
     ('regressor', LinearRegression())
 ])
 
-# Dividir os dados em treinamento e teste
+# Dividir los datos en entrenamiento y prueba
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Configurar o experimento no MLflow
+# Configurar el experimento en MLflow
 experiment_id = mlflow.set_experiment("modelo_regresion_lineal1").experiment_id
 
-# Iniciar a execução no MLflow
+# Iniciar la ejecución en MLflow
 with mlflow.start_run(experiment_id=experiment_id) as run:
-    # Treinar o modelo
+    # Entrenar el modelo
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
     
@@ -52,14 +52,16 @@ with mlflow.start_run(experiment_id=experiment_id) as run:
     rmse = np.sqrt(mse)
     mae = mean_absolute_error(y_test, y_pred)
     r2 = r2_score(y_test, y_pred)
-    
-    # Registrar métricas no MLflow
+    cross_val_rmse = np.sqrt(-cross_val_score(model, X, y, cv=5, scoring='neg_mean_squared_error').mean())
+
+    # Registrar métricas en MLflow
     mlflow.log_metric("RMSE", rmse)
     mlflow.log_metric("MAE", mae)
     mlflow.log_metric("R2", r2)
+    mlflow.log_metric("Cross-validated RMSE", cross_val_rmse)
     
-    # Registrar o modelo no MLflow
+    # Registrar el modelo en MLflow
     mlflow.sklearn.log_model(model, "modelo_regresion_lineal1")
 
-    # Exibir as métricas
+    # Mostrar las métricas
     print(f"RMSE: {rmse}, MAE: {mae}, R2: {r2}")
