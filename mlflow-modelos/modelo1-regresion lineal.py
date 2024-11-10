@@ -1,56 +1,55 @@
-# Instalar pacotes no Databricks (se necessário)
-# %pip install mlflow
-
-import pandas as pd
-import numpy as np
-from sklearn.model_selection import train_test_split, cross_val_score
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 import mlflow
 import mlflow.sklearn
+import numpy as np
+import pandas as pd
+from pyspark.sql import SparkSession
+from sklearn.compose import ColumnTransformer
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.model_selection import cross_val_score, train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-# Definir o caminho do arquivo Parquet no Databricks File System (DBFS)
-df = pd.read_parquet("/tmp/df_basefinal.parquet")
 
-# Seleção de características e alvo
+# Cargar la base de datos
+df = pd.read_parquet('../files_parquet/df_baseFinal.parquet', engine='pyarrow')
+
+# Selección de características y objetivo
 features = ['temporada', 'nombre_categoria_producto', 'peso_producto_g', 
             'largo_producto_cm', 'altura_producto_cm', 'ancho_producto_cm', 
             'ciudad_cliente', 'estado_cliente', "id_producto"]
 target = 'precio'
 
-# Preparação dos dados
+# Preparación de los datos
 X = df[features]
 y = df[target]
 
-# Definir colunas numéricas e categóricas
+# Definir columnas numéricas y categóricas
 numerical_features = ['peso_producto_g', 'largo_producto_cm', 'altura_producto_cm', 'ancho_producto_cm']
 categorical_features = ['temporada', 'nombre_categoria_producto', 'ciudad_cliente', 'estado_cliente', "id_producto"]
 
-# Pré-processamento
+# Preprocesamiento
 preprocessor = ColumnTransformer(
     transformers=[ 
         ('num', StandardScaler(), numerical_features),
         ('cat', OneHotEncoder(handle_unknown='ignore'), categorical_features)
     ])
 
-# Configuração do modelo com pipeline usando regressão linear
+# Configuración del modelo con pipeline usando regresión lineal
 model = Pipeline(steps=[
     ('preprocessor', preprocessor),
     ('regressor', LinearRegression())
 ])
 
-# Dividir os dados em treinamento e teste
+# Dividir los datos en entrenamiento y prueba
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Iniciar o MLflow para registrar o experimento
+# Iniciar MLflow para registrar el experimento
 with mlflow.start_run() as run:
-    # Treinar o modelo
+    # Entrenar el modelo
     model.fit(X_train, y_train)
 
-    # Predições
+    # Predicciones
     y_pred = model.predict(X_test)
 
     # Calcular métricas
@@ -60,22 +59,22 @@ with mlflow.start_run() as run:
     r2 = r2_score(y_test, y_pred)
     cross_val_rmse = np.sqrt(-cross_val_score(model, X, y, cv=5, scoring='neg_mean_squared_error').mean())
 
-    # Logar as métricas no MLflow
+    # Registrar las métricas en MLflow
     mlflow.log_metric("RMSE", rmse)
     mlflow.log_metric("MAE", mae)
     mlflow.log_metric("R2", r2)
     mlflow.log_metric("Cross-validated RMSE", cross_val_rmse)
     
-    # Logar o modelo no MLflow
+    # Registrar el modelo en MLflow
     mlflow.sklearn.log_model(model, "LinearRegressionModel")
 
-    # Exibir as métricas
+    # Mostrar las métricas
     print(f"Root Mean Squared Error (RMSE): {rmse}")
     print(f"Mean Absolute Error (MAE): {mae}")
     print(f"R²: {r2}")
     print(f"Cross-validated RMSE: {cross_val_rmse}")
 
-    # Predição para um novo dado
+    # Predicción para un nuevo dato
     new_data = pd.DataFrame({
         'temporada': ['Invierno'],
         'nombre_categoria_producto': ['cama_mesa_banho'],
@@ -90,5 +89,5 @@ with mlflow.start_run() as run:
     predicted_price = model.predict(new_data)
     print(f"Predicted Seasonal Price: {predicted_price[0]}")
 
-    # Logar a predição para referência futura
+    # Registrar la predicción para referencia futura
     mlflow.log_param("Predicted Seasonal Price", predicted_price[0])
