@@ -43,7 +43,7 @@ model = Pipeline(steps=[
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # Configurar el experimento en MLflow
-experiment_id = mlflow.set_experiment("modelo_regresion_lineal3").experiment_id
+experiment_id = mlflow.set_experiment("modelo_regresion_lineal1").experiment_id
 
 # Iniciar la ejecución en MLflow
 with mlflow.start_run(experiment_id=experiment_id) as run:
