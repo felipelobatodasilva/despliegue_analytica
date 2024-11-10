@@ -64,7 +64,6 @@ with mlflow.start_run(experiment_id=experiment_id) as run:
     mlflow.sklearn.log_model(model, "modelo_regresion_lineal1")
 
     # Mostrar las métricas
-    print(f"Mean Squared Error (MSE): {mse}")
     print(f"Root Mean Squared Error (RMSE): {rmse}")
     print(f"Mean Absolute Error (MAE): {mae}")
     print(f"R²: {r2}")
