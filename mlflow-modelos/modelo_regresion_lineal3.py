@@ -57,7 +57,6 @@ with mlflow.start_run(experiment_id=experiment_id) as run:
     cross_val_rmse = np.sqrt(-cross_val_score(model, X, y, cv=5, scoring='neg_mean_squared_error').mean())
 
     # Registrar métricas en MLflow
-    mlflow.log_metric("MSE", mse)
     mlflow.log_metric("RMSE", rmse)
     mlflow.log_metric("MAE", mae)
     mlflow.log_metric("R2", r2)
