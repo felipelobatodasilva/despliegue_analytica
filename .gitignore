@@ -1,3 +1,4 @@
-/files_csv
+/files_csv/*
+!/files_csv/base_dash.csv
 /files_parquet
 /archivos_base
